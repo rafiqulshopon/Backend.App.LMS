@@ -29,6 +29,7 @@ const server = new ApolloServer({
 
 const PORT = process.env.PORT || 4000;
 const MONGO_URI = process.env.MONGODB_URL;
+const API_URL = process.env.API_URL;
 
 mongoose
   .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -39,10 +40,8 @@ mongoose
     app.use('/graphql', expressMiddleware(server));
 
     httpServer.listen(PORT, () => {
-      console.log(
-        `🚀 GraphQL server ready at http://localhost:${PORT}/graphql`
-      );
-      console.log(`REST server ready at http://localhost:${PORT}/auth`);
+      console.log(`🚀 GraphQL server ready at ${API_URL}/graphql`);
+      console.log(`REST server ready at ${API_URL}/auth`);
     });
   })
   .catch((err) => {
