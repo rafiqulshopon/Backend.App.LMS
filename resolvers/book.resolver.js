@@ -2,7 +2,11 @@ import Book from '../models/book.model.js';
 
 const bookResolvers = {
   Query: {
-    books: async () => {
+    books: async (_, {}, context) => {
+      if (!context.userId) {
+        throw new Error('Authentication failed. Please log in.');
+      }
+
       try {
         const books = await Book.find({});
         return books;
@@ -12,7 +16,11 @@ const bookResolvers = {
     },
   },
   Mutation: {
-    addBook: async (_, { input }) => {
+    addBook: async (_, { input }, context) => {
+      if (!context.userId) {
+        throw new Error('Authentication failed. Please log in.');
+      }
+
       try {
         const newBook = new Book(input);
         const savedBook = await newBook.save();
