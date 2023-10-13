@@ -13,6 +13,11 @@ import authRoutes from './auth/auth.routes.js';
 
 dotenv.config();
 
+const PORT = process.env.PORT || 4000;
+const MONGO_URI = process.env.MONGODB_URL;
+const API_URL = process.env.API_URL;
+const SECRET_KEY = process.env.JWT_SECRET;
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -33,11 +38,6 @@ const server = new ApolloServer({
     };
   },
 });
-
-const PORT = process.env.PORT || 4000;
-const MONGO_URI = process.env.MONGODB_URL;
-const API_URL = process.env.API_URL;
-const SECRET_KEY = process.env.JWT_SECRET;
 
 mongoose
   .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
