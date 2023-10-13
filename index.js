@@ -27,8 +27,6 @@ const server = new ApolloServer({
   introspection: true,
   playground: true,
   formatError: (err) => {
-    console.error(err);
-
     return {
       message: err.message,
       statusCode: err.extensions?.code || 'INTERNAL_SERVER_ERROR',
