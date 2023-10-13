@@ -1,10 +1,15 @@
+import { GraphQLError } from 'graphql';
 import Book from '../models/book.model.js';
 
 const bookResolvers = {
   Query: {
     books: async (_, {}, context) => {
       if (!context.userId) {
-        throw new Error('Authentication failed. Please log in.');
+        throw new GraphQLError('Authentication failed. Please log in.', {
+          extensions: {
+            code: 'AUTHENTICATION_FAILED',
+          },
+        });
       }
 
       try {
@@ -18,7 +23,11 @@ const bookResolvers = {
   Mutation: {
     addBook: async (_, { input }, context) => {
       if (!context.userId) {
-        throw new Error('Authentication failed. Please log in.');
+        throw new GraphQLError('Authentication failed. Please log in.', {
+          extensions: {
+            code: 'AUTHENTICATION_FAILED',
+          },
+        });
       }
 
       try {
