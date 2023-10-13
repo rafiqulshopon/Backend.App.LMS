@@ -26,6 +26,14 @@ const server = new ApolloServer({
   plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   introspection: true,
   playground: true,
+  formatError: (err) => {
+    console.error(err);
+
+    return {
+      message: err.message,
+      statusCode: err.extensions?.code || 'INTERNAL_SERVER_ERROR',
+    };
+  },
 });
 
 const PORT = process.env.PORT || 4000;
