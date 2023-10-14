@@ -4,8 +4,9 @@ const bookSchema = gql`
   type Book {
     id: ID!
     title: String!
-    authorId: ID!
-    categoryId: ID!
+    author: String!
+    category: String!
+    department: String!
     description: String
     publishedDate: String
     isbn: String!
@@ -13,11 +14,18 @@ const bookSchema = gql`
 
   input AddBookInput {
     title: String!
-    authorId: ID!
-    categoryId: ID!
+    author: String!
+    category: String!
+    department: String!
     description: String
     publishedDate: String
     isbn: String!
+  }
+
+  input BookQueryInput {
+    department: String
+    author: String
+    title: String
   }
 
   type BookResponse {
@@ -31,7 +39,7 @@ const bookSchema = gql`
   }
 
   extend type Query {
-    books: [Book!]!
+    books(input: BookQueryInput): [Book!]!
   }
 `;
 

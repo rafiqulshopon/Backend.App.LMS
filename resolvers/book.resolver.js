@@ -3,7 +3,7 @@ import Book from '../models/book.model.js';
 
 const bookResolvers = {
   Query: {
-    books: async (_, {}, context) => {
+    books: async (_, { input }, context) => {
       if (!context.userId) {
         throw new GraphQLError('Authentication failed. Please log in.', {
           extensions: {
@@ -13,7 +13,12 @@ const bookResolvers = {
       }
 
       try {
-        const books = await Book.find({});
+        const query = {};
+        if (input?.department) query.department = input.department;
+        if (input?.author) query.author = input.author;
+        if (input?.title) query.title = input.title;
+
+        const books = await Book.find(query);
         return books;
       } catch (error) {
         throw new Error('Failed to fetch books');
@@ -22,10 +27,13 @@ const bookResolvers = {
   },
   Mutation: {
     addBook: async (_, { input }, context) => {
-      if (!context.userId) {
-        throw new GraphQLError('Authentication failed. Please log in.', {
+      if (
+        !context.userId &&
+        (context.role !== 'admin' || context.role !== 'librarian')
+      ) {
+        throw new GraphQLError('Not authorized', {
           extensions: {
-            code: 'AUTHENTICATION_FAILED',
+            code: 'UNAUTHORIZED',
           },
         });
       }
