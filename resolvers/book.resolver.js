@@ -15,8 +15,9 @@ const bookResolvers = {
       try {
         const query = {};
         if (input?.department) query.department = input.department;
-        if (input?.author) query.author = input.author;
-        if (input?.title) query.title = input.title;
+        if (input?.author)
+          query.author = { $regex: input.author, $options: 'i' };
+        if (input?.title) query.title = { $regex: input.title, $options: 'i' };
 
         const books = await Book.find(query);
         return books;
