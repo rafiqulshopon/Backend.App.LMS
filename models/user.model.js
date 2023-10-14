@@ -14,6 +14,11 @@ const userSchema = new mongoose.Schema({
   dateOfBirth: { type: Date, required: true },
   phoneNumber: { type: String, required: true, unique: true },
   address: { type: String, required: false },
+  role: {
+    type: String,
+    required: true,
+    enum: ['student', 'teacher', 'librarian', 'admin'],
+  },
 });
 
 // Before saving the user, hash the password
