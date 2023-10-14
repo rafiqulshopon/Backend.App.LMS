@@ -1,6 +1,9 @@
 import express from 'express';
 import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const router = express.Router();
 
@@ -91,6 +94,40 @@ router.post('/login', async (req, res) => {
     );
 
     res.status(200).json({ token });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: 'Something went wrong.', error: error.message });
+  }
+});
+
+router.patch('/update-profile', async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (!decoded.id) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    const updatableFields = [
+      'name',
+      'department',
+      'batch',
+      'phoneNumber',
+      'address',
+    ];
+    let update = {};
+
+    updatableFields.forEach((field) => {
+      if (req.body[field]) {
+        update[field] = req.body[field];
+      }
+    });
+
+    await User.findByIdAndUpdate(decoded.id, update);
+
+    res.status(200).json({ message: 'Profile updated successfully' });
   } catch (error) {
     res
       .status(500)
