@@ -4,11 +4,7 @@ import User from '../models/user.model.js';
 const userResolvers = {
   Query: {
     allUsers: async (_, { input }, context) => {
-      if (
-        !context.userId ||
-        context.role !== 'admin' ||
-        context.role !== 'librarian'
-      ) {
+      if (!context.userId || context.role !== 'admin') {
         throw new GraphQLError('Not authorized', {
           extensions: {
             code: 'UNAUTHORIZED',
