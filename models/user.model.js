@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema({
     required: true,
     enum: ['student', 'teacher', 'librarian', 'admin'],
   },
+  otp: String,
+  otpExpires: Date,
+  isVerified: { type: Boolean, default: false },
 });
 
 // Before saving the user, hash the password
