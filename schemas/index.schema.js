@@ -2,6 +2,7 @@ import gql from 'graphql-tag';
 import queryTypeDefs from './queries.schema.js';
 import mutationTypeDefs from './mutations.schema.js';
 import bookSchema from './book.schema.js';
+import userSchema from './user.schema.js';
 
 const rootTypeDefs = gql`
   type Root {
@@ -9,6 +10,12 @@ const rootTypeDefs = gql`
   }
 `;
 
-const typeDefs = [rootTypeDefs, queryTypeDefs, mutationTypeDefs, bookSchema];
+const typeDefs = [
+  rootTypeDefs,
+  queryTypeDefs,
+  mutationTypeDefs,
+  bookSchema,
+  userSchema,
+];
 
 export default typeDefs;
