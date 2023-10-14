@@ -18,8 +18,8 @@ Ensure you have the following installed on your local machine:
 1. **Clone the repository:**
 
 ```sh
-git clone https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git
-cd YOUR-REPO-NAME
+git clone https://github.com/rafiqulshopon/Backend.App.LMS.git
+cd Backend.App.LMS
 ```
 
 2. **Install dependencies:**
@@ -35,7 +35,7 @@ Create a `.env` file in the root directory and add the following with your crede
 ```env
 MONGO_URI=YOUR_MONGODB_URI
 JWT_SECRET=YOUR_JWT_SECRET
-PORT=YOUR_PREFERRED_PORT_NUMBER
+PORT=4000
 API_URL=http://localhost:4000
 ```
 
