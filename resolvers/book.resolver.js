@@ -22,10 +22,10 @@ const bookResolvers = {
   },
   Mutation: {
     addBook: async (_, { input }, context) => {
-      if (!context.userId) {
-        throw new GraphQLError('Authentication failed. Please log in.', {
+      if (!context.userId && context.role !== 'admin') {
+        throw new GraphQLError('Not authorized', {
           extensions: {
-            code: 'AUTHENTICATION_FAILED',
+            code: 'UNAUTHORIZED',
           },
         });
       }

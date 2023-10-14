@@ -53,17 +53,19 @@ mongoose
             req.headers.authorization &&
             req.headers.authorization.split('Bearer ')[1];
           let userId = null;
+          let role = null;
 
           if (token) {
             try {
               const decodedToken = jwt.verify(token, SECRET_KEY);
               userId = decodedToken.id;
+              role = decodedToken.role;
             } catch (err) {
               throw new Error('Invalid token');
             }
           }
 
-          return { userId };
+          return { userId, role };
         },
       })
     );

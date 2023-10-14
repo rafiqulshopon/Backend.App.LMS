@@ -16,6 +16,7 @@ router.post('/signup', async (req, res) => {
       dateOfBirth,
       phoneNumber,
       address,
+      role,
     } = req.body;
 
     const existingUser = await User.findOne({ email });
@@ -33,6 +34,7 @@ router.post('/signup', async (req, res) => {
       dateOfBirth,
       phoneNumber,
       address,
+      role,
     });
     await newUser.save();
 
@@ -43,6 +45,7 @@ router.post('/signup', async (req, res) => {
         department: newUser.department,
         batch: newUser.batch,
         studentId: newUser.studentId,
+        role: newUser.role,
       },
       process.env.JWT_SECRET,
       {
@@ -79,6 +82,7 @@ router.post('/login', async (req, res) => {
         department: existingUser.department,
         batch: existingUser.batch,
         studentId: existingUser.studentId,
+        role: existingUser.role,
       },
       process.env.JWT_SECRET,
       {
