@@ -39,8 +39,6 @@ const userResolvers = {
         const users = await User.find(query);
 
         return {
-          success: true,
-          message: 'Users fetched successfully',
           users,
         };
       } catch (error) {

@@ -21,8 +21,6 @@ const userSchema = gql`
   }
 
   type UserQueryResponse {
-    success: Boolean!
-    message: String
     users: [User!]!
   }
 
