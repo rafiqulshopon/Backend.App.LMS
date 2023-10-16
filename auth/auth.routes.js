@@ -3,7 +3,6 @@ import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
-import bcrypt from 'bcryptjs';
 
 dotenv.config();
 
@@ -156,8 +155,7 @@ router.post('/reset-password', async (req, res) => {
       return res.status(400).json({ message: 'Invalid or expired OTP.' });
     }
 
-    // Hash the new password and update the user record.
-    user.password = await bcrypt.hash(newPassword, 10);
+    user.password = newPassword;
     user.otp = undefined;
     user.otpExpires = undefined;
 
