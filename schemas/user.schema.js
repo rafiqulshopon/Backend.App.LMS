@@ -37,6 +37,7 @@ const userSchema = gql`
 
   extend type Query {
     allUsers(input: UserQueryInput): UserQueryResponse!
+    myProfile: User!
   }
 `;
 
