@@ -49,13 +49,22 @@ const userResolvers = {
         };
       }
     },
-  },
-  User: {
-    name: (parent) => {
-      return {
-        first: parent.name.first,
-        last: parent.name.last,
-      };
+    myProfile: async (_, args, context) => {
+      if (!context.userId) {
+        throw new GraphQLError('Authentication failed. Please log in.');
+      }
+
+      try {
+        const user = await User.findById(context.userId).select('-password');
+
+        if (!user) {
+          throw new GraphQLError('User not found.');
+        }
+
+        return user;
+      } catch (error) {
+        throw new Error('Failed to fetch user profile.');
+      }
     },
   },
 };
