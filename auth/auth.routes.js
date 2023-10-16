@@ -3,6 +3,7 @@ import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
+import bcrypt from 'bcryptjs';
 
 dotenv.config();
 
@@ -77,6 +78,40 @@ router.post('/signup', async (req, res) => {
   }
 });
 
+router.post('/forget-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ message: 'User not found.' });
+    }
+
+    // Generate OTP and set expiry time
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes expiry
+
+    user.otp = otp;
+    user.otpExpires = otpExpires;
+    await user.save();
+
+    // Send OTP via email
+    await transporter.sendMail({
+      to: email,
+      subject: 'Your OTP for Password Reset',
+      text: `Your OTP for password reset is: ${otp}`,
+    });
+
+    res.status(200).json({
+      message: 'OTP sent to your email. Please verify to reset password.',
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: 'Something went wrong.', error: error.message });
+  }
+});
+
 router.post('/verify-otp', async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -107,6 +142,28 @@ router.post('/verify-otp', async (req, res) => {
     } else {
       throw new Error('Invalid or expired OTP.');
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user || user.otp !== otp || user.otpExpires < new Date()) {
+      return res.status(400).json({ message: 'Invalid or expired OTP.' });
+    }
+
+    // Hash the new password and update the user record.
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.otp = undefined;
+    user.otpExpires = undefined;
+
+    await user.save();
+
+    res.status(200).json({ message: 'Password has been successfully reset.' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -148,40 +205,6 @@ router.post('/login', async (req, res) => {
     );
 
     res.status(200).json({ token });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'Something went wrong.', error: error.message });
-  }
-});
-
-router.patch('/update-profile', async (req, res) => {
-  try {
-    const token = req.headers.authorization.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    if (!decoded.id) {
-      return res.status(403).json({ message: 'Not authorized' });
-    }
-
-    const updatableFields = [
-      'name',
-      'department',
-      'batch',
-      'phoneNumber',
-      'address',
-    ];
-    let update = {};
-
-    updatableFields.forEach((field) => {
-      if (req.body[field]) {
-        update[field] = req.body[field];
-      }
-    });
-
-    await User.findByIdAndUpdate(decoded.id, update);
-
-    res.status(200).json({ message: 'Profile updated successfully' });
   } catch (error) {
     res
       .status(500)
