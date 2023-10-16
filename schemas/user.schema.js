@@ -35,6 +35,17 @@ const userSchema = gql`
     name: String
   }
 
+  input EditProfileInput {
+    address: String
+    phoneNumber: String
+    department: String
+    batch: String
+  }
+
+  extend type Mutation {
+    editProfile(input: EditProfileInput!): User!
+  }
+
   extend type Query {
     allUsers(input: UserQueryInput): UserQueryResponse!
     myProfile: User!
