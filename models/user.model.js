@@ -19,12 +19,16 @@ const userSchema = new mongoose.Schema({
     required: true,
     enum: ['student', 'teacher', 'librarian', 'admin'],
   },
+  otp: String,
+  otpExpires: Date,
+  isVerified: { type: Boolean, default: false },
 });
 
 // Before saving the user, hash the password
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
   next();
 });
 

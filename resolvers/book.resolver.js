@@ -15,8 +15,9 @@ const bookResolvers = {
       try {
         const query = {};
         if (input?.department) query.department = input.department;
-        if (input?.author) query.author = input.author;
-        if (input?.title) query.title = input.title;
+        if (input?.author)
+          query.author = { $regex: input.author, $options: 'i' };
+        if (input?.title) query.title = { $regex: input.title, $options: 'i' };
 
         const books = await Book.find(query);
         return books;
@@ -39,12 +40,57 @@ const bookResolvers = {
       }
 
       try {
-        const newBook = new Book(input);
+        const newBook = new Book({
+          ...input,
+          currentQuantity: input.totalQuantity,
+        });
         const savedBook = await newBook.save();
 
         return {
           success: true,
           message: 'Book added successfully',
+          book: savedBook,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message,
+        };
+      }
+    },
+
+    editBook: async (_, { input }, context) => {
+      if (
+        !context.userId ||
+        (context.role !== 'admin' && context.role !== 'librarian')
+      ) {
+        throw new GraphQLError('Not authorized', {
+          extensions: {
+            code: 'UNAUTHORIZED',
+          },
+        });
+      }
+
+      try {
+        const existingBook = await Book.findById(input.id);
+        if (!existingBook) {
+          return {
+            success: false,
+            message: 'Book not found.',
+          };
+        }
+
+        Object.keys(input).forEach((key) => {
+          if (key !== 'id' && input[key] !== undefined) {
+            existingBook[key] = input[key];
+          }
+        });
+
+        const savedBook = await existingBook.save();
+
+        return {
+          success: true,
+          message: 'Book updated successfully',
           book: savedBook,
         };
       } catch (error) {
