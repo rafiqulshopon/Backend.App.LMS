@@ -2,6 +2,37 @@ import { GraphQLError } from 'graphql';
 import User from '../models/user.model.js';
 
 const userResolvers = {
+  Mutation: {
+    editProfile: async (_, { input }, context) => {
+      if (!context.userId) {
+        throw new GraphQLError('Authentication failed. Please log in.');
+      }
+
+      try {
+        const updates = {};
+
+        if (input.address !== undefined) updates.address = input.address;
+        if (input.phoneNumber !== undefined)
+          updates.phoneNumber = input.phoneNumber;
+        if (input.department !== undefined)
+          updates.department = input.department;
+        if (input.batch !== undefined) updates.batch = input.batch;
+
+        const user = await User.findByIdAndUpdate(context.userId, updates, {
+          new: true,
+        }).select('-password');
+
+        if (!user) {
+          throw new GraphQLError('User not found.');
+        }
+
+        return user;
+      } catch (error) {
+        throw new Error('Failed to update user profile.');
+      }
+    },
+  },
+
   Query: {
     allUsers: async (_, { input }, context) => {
       if (!context.userId || context.role !== 'admin') {
