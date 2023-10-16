@@ -8,6 +8,8 @@ const bookSchema = new mongoose.Schema({
   description: String,
   publishedDate: String,
   isbn: { type: String, required: true },
+  totalQuantity: { type: Number, required: true, default: 0 },
+  currentQuantity: { type: Number, required: true, default: 0 },
 });
 
 const Book = mongoose.model('Book', bookSchema);
