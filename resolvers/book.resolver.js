@@ -58,6 +58,48 @@ const bookResolvers = {
         };
       }
     },
+
+    editBook: async (_, { input }, context) => {
+      if (
+        !context.userId ||
+        (context.role !== 'admin' && context.role !== 'librarian')
+      ) {
+        throw new GraphQLError('Not authorized', {
+          extensions: {
+            code: 'UNAUTHORIZED',
+          },
+        });
+      }
+
+      try {
+        const existingBook = await Book.findById(input.id);
+        if (!existingBook) {
+          return {
+            success: false,
+            message: 'Book not found.',
+          };
+        }
+
+        Object.keys(input).forEach((key) => {
+          if (key !== 'id' && input[key] !== undefined) {
+            existingBook[key] = input[key];
+          }
+        });
+
+        const savedBook = await existingBook.save();
+
+        return {
+          success: true,
+          message: 'Book updated successfully',
+          book: savedBook,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message,
+        };
+      }
+    },
   },
 };
 
