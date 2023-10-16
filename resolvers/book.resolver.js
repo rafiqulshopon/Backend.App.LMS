@@ -40,7 +40,10 @@ const bookResolvers = {
       }
 
       try {
-        const newBook = new Book(input);
+        const newBook = new Book({
+          ...input,
+          currentQuantity: input.totalQuantity,
+        });
         const savedBook = await newBook.save();
 
         return {

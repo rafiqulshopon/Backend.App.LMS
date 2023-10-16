@@ -10,6 +10,8 @@ const bookSchema = gql`
     description: String
     publishedDate: String
     isbn: String!
+    totalQuantity: Int!
+    currentQuantity: Int!
   }
 
   input AddBookInput {
@@ -20,6 +22,7 @@ const bookSchema = gql`
     description: String
     publishedDate: String
     isbn: String!
+    totalQuantity: Int!
   }
 
   input BookQueryInput {
