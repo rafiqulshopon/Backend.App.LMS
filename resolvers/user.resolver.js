@@ -11,12 +11,10 @@ const userResolvers = {
       try {
         const updates = {};
 
-        if (input.address !== undefined) updates.address = input.address;
-        if (input.phoneNumber !== undefined)
-          updates.phoneNumber = input.phoneNumber;
-        if (input.department !== undefined)
-          updates.department = input.department;
-        if (input.batch !== undefined) updates.batch = input.batch;
+        if (input.address) updates.address = input.address;
+        if (input.phoneNumber) updates.phoneNumber = input.phoneNumber;
+        if (input.department) updates.department = input.department;
+        if (input.batch) updates.batch = input.batch;
 
         const user = await User.findByIdAndUpdate(context.userId, updates, {
           new: true,
