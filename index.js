@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import authRoutes from './auth/auth.routes.js';
 import bookRoutes from './controllers/book.controller.js';
 import userRoutes from './controllers/user.controller.js';
+import borrowRoutes from './controllers/borrowingHistory.controller.js';
 
 dotenv.config();
 
@@ -50,6 +51,9 @@ app.use('/', bookRoutes);
 
 // users api
 app.use('/', userRoutes);
+
+// borrow & return api
+app.use('/', borrowRoutes);
 
 mongoose
   .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })

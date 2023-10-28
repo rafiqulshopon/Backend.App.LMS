@@ -183,17 +183,12 @@ router.put('/activate/:id', async (req, res) => {
 router.delete('/user/:id', async (req, res) => {
   const { userId, role } = req.context || {};
 
-  if ((role !== 'admin' && role !== 'librarian') || userId === req.params.id) {
-    console.log(
-      'User role:',
-      role,
-      'User ID:',
-      userId,
-      'Requested ID:',
-      req.params.id
-    );
-
+  if (role !== 'admin' && role !== 'librarian') {
     return res.status(403).json({ message: 'Not authorized' });
+  }
+
+  if (userId === req.params.id) {
+    return res.status(403).json({ message: `Can't delete own profile.` });
   }
 
   try {
@@ -205,8 +200,6 @@ router.delete('/user/:id', async (req, res) => {
 
     return res.status(200).json({ message: 'User deleted successfully.' });
   } catch (error) {
-    console.error('Error occurred while deleting user:', error);
-
     if (error instanceof mongoose.Error.CastError) {
       return res.status(400).json({ message: 'Invalid user ID.' });
     }
