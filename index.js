@@ -5,7 +5,8 @@ import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import authRoutes from './auth/auth.routes.js';
-import { addBook, editBook, getBooks } from './controllers/book.controller.js';
+import bookRoutes from './controllers/book.controller.js';
+import userRoutes from './controllers/user.controller.js';
 
 dotenv.config();
 
@@ -41,12 +42,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// auth api
 app.use('/auth', authRoutes);
 
 // books api
-app.get('/books', getBooks);
-app.post('/books', addBook);
-app.put('/books/:id', editBook);
+app.use('/', bookRoutes);
+
+// users api
+app.use('/', userRoutes);
 
 mongoose
   .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })

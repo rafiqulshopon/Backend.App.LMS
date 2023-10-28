@@ -1,8 +1,11 @@
+import express from 'express';
 import Book from '../models/book.model.js';
 
+const router = express.Router();
 const allowedRoles = ['admin', 'librarian'];
 
-export const getBooks = async (req, res) => {
+// Fetch all books
+router.get('/books', async (req, res) => {
   const userId = req.context.userId;
   if (!userId) {
     return res
@@ -22,9 +25,10 @@ export const getBooks = async (req, res) => {
   } catch (error) {
     res.status(500).send({ message: 'Failed to fetch books' });
   }
-};
+});
 
-export const addBook = async (req, res) => {
+// Add a book
+router.post('/books', async (req, res) => {
   const input = req.body;
   const { userId, role } = req.context || {};
 
@@ -50,9 +54,10 @@ export const addBook = async (req, res) => {
       message: error.message,
     });
   }
-};
+});
 
-export const editBook = async (req, res) => {
+// Edit a book
+router.put('/books/:id', async (req, res) => {
   const input = req.body;
   const { userId, role } = req.context || {};
   const bookId = req.params.id;
@@ -89,4 +94,6 @@ export const editBook = async (req, res) => {
       message: error.message,
     });
   }
-};
+});
+
+export default router;
