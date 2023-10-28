@@ -64,10 +64,11 @@ router.get('/borrow-list', async (req, res) => {
     author,
     bookDepartment,
     userDepartment,
+    status = 'borrowed',
   } = req.body || {};
 
   // Building the search criteria dynamically
-  let filterCriteria = { status: 'borrowed' };
+  let filterCriteria = { status };
 
   if (userId) filterCriteria['user'] = userId;
   if (studentId) filterCriteria['user.studentId'] = studentId;
