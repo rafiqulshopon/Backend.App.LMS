@@ -53,4 +53,64 @@ router.post('/assign', async (req, res) => {
   }
 });
 
+router.get('/borrow-list', async (req, res) => {
+  // Extracting query parameters
+  const {
+    userId,
+    studentId,
+    firstName,
+    lastName,
+    title,
+    author,
+    bookDepartment,
+    userDepartment,
+  } = req.query || {};
+
+  // Building the search criteria dynamically
+  let filterCriteria = { status: 'borrowed' };
+
+  if (userId) filterCriteria['user'] = userId;
+  if (studentId) filterCriteria['user.studentId'] = studentId;
+
+  try {
+    // Fetch borrowing records based on filters
+    const borrowedBooks = await BorrowingHistory.find(filterCriteria)
+      .populate({
+        path: 'book',
+        select:
+          'title author category department description publishedDate isbn totalQuantity currentQuantity',
+        match: {
+          ...(title && { title: { $regex: title, $options: 'i' } }),
+          ...(author && { author: { $regex: author, $options: 'i' } }),
+          ...(bookDepartment && {
+            department: { $regex: bookDepartment, $options: 'i' },
+          }),
+        },
+      })
+      .populate({
+        path: 'user',
+        select:
+          'name email dateOfBirth phoneNumber role address batch department studentId',
+        match: {
+          ...(firstName && {
+            'name.first': { $regex: firstName, $options: 'i' },
+          }),
+          ...(lastName && { 'name.last': { $regex: lastName, $options: 'i' } }),
+          ...(userDepartment && {
+            department: { $regex: userDepartment, $options: 'i' },
+          }),
+        },
+      });
+
+    // Filter out any borrowing records that did not match the book/user populate conditions
+    const filteredBorrowedBooks = borrowedBooks.filter(
+      (record) => record.book && record.user
+    );
+
+    res.status(200).json({ borrowingHistories: filteredBorrowedBooks });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+});
+
 export default router;
