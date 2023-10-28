@@ -11,8 +11,8 @@ const userSchema = new mongoose.Schema({
   department: { type: String, required: false },
   studentId: { type: String, required: false, unique: true },
   batch: { type: String, required: false },
-  dateOfBirth: { type: Date, required: true },
-  phoneNumber: { type: String, required: true, unique: true },
+  dateOfBirth: { type: Date, required: false },
+  phoneNumber: { type: String, required: false, unique: true },
   address: { type: String, required: false },
   role: {
     type: String,
