@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import User from '../models/user.model.js';
 
 const router = express.Router();
@@ -175,6 +176,41 @@ router.put('/activate/:id', async (req, res) => {
     return res.status(200).json({ message: 'User activated successfully.' });
   } catch (error) {
     return res.status(500).json({ message: 'Failed to activate user.' });
+  }
+});
+
+// Delete a user permanently
+router.delete('/user/:id', async (req, res) => {
+  const { userId, role } = req.context || {};
+
+  if ((role !== 'admin' && role !== 'librarian') || userId === req.params.id) {
+    console.log(
+      'User role:',
+      role,
+      'User ID:',
+      userId,
+      'Requested ID:',
+      req.params.id
+    );
+
+    return res.status(403).json({ message: 'Not authorized' });
+  }
+
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    return res.status(200).json({ message: 'User deleted successfully.' });
+  } catch (error) {
+    console.error('Error occurred while deleting user:', error);
+
+    if (error instanceof mongoose.Error.CastError) {
+      return res.status(400).json({ message: 'Invalid user ID.' });
+    }
+    return res.status(500).json({ message: 'Failed to delete user.' });
   }
 });
 
