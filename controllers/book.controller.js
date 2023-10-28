@@ -15,7 +15,7 @@ router.get('/books', async (req, res) => {
 
   try {
     const query = {};
-    const input = req.query;
+    const input = req.body;
     if (input?.department) query.department = input.department;
     if (input?.author) query.author = { $regex: input.author, $options: 'i' };
     if (input?.title) query.title = { $regex: input.title, $options: 'i' };
