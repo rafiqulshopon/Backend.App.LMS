@@ -176,6 +176,12 @@ router.post('/login', async (req, res) => {
       return res.status(404).json({ message: "User doesn't exist." });
     }
 
+    if (!existingUser.isActive) {
+      return res.status(400).json({
+        message: 'Your account is deactivated, please contact with admin.',
+      });
+    }
+
     const isPasswordValid = await existingUser.isValidPassword(password);
     if (!isPasswordValid) {
       return res.status(400).json({ message: 'Invalid password.' });

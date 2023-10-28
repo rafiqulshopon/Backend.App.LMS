@@ -40,7 +40,7 @@ router.put('/profile', async (req, res) => {
 router.get('/users', async (req, res) => {
   const { userId, role } = req.context || {};
 
-  if (!userId || role !== 'admin') {
+  if (role !== 'admin') {
     return res.status(403).json({ message: 'Not authorized' });
   }
 
@@ -99,6 +99,58 @@ router.get('/profile', async (req, res) => {
     return res.status(200).json(user);
   } catch (error) {
     return res.status(500).json({ message: 'Failed to fetch user profile.' });
+  }
+});
+
+//Deactivate user
+router.put('/deactivate/:userId', async (req, res) => {
+  const { userId, role } = req.context || {};
+  const targetUserId = req.params.userId;
+
+  if (!(role === 'admin' || role === 'librarian')) {
+    return res.status(403).json({ message: 'Not authorized' });
+  }
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      targetUserId,
+      { isActive: false },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    return res.status(200).json({ message: 'User successfully deactivated.' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to deactivate user.' });
+  }
+});
+
+//Active user
+
+router.put('/activate/:id', async (req, res) => {
+  const { userId, role } = req.context || {};
+
+  if (role !== 'admin' && role !== 'librarian') {
+    return res.status(403).json({ message: 'Not authorized' });
+  }
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isActive: true, isVerified: true },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    return res.status(200).json({ message: 'User activated successfully.' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to activate user.' });
   }
 });
 
