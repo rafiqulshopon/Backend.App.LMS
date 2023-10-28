@@ -7,7 +7,7 @@ const router = express.Router();
 // Edit Profile
 router.put('/profile', async (req, res) => {
   const { userId } = req.context || {};
-  const input = req.body;
+  const input = req.body || {};
 
   if (!userId) {
     return res
@@ -45,7 +45,7 @@ router.get('/users', async (req, res) => {
     return res.status(403).json({ message: 'Not authorized' });
   }
 
-  const input = req.query;
+  const input = req.body || {};
 
   try {
     const query = {};
@@ -82,7 +82,7 @@ router.get('/users', async (req, res) => {
 
 // Fetch a single user by ID
 router.get('/user/:id', async (req, res) => {
-  const { userId, role } = req.context || {};
+  const { role } = req.context || {};
 
   if (role !== 'admin' && role !== 'librarian') {
     return res.status(403).json({ message: 'Not authorized' });
@@ -136,6 +136,10 @@ router.put('/deactivate/:userId', async (req, res) => {
     return res.status(403).json({ message: 'Not authorized' });
   }
 
+  if (userId === targetUserId) {
+    return res.status(403).json({ message: `Can't deactivate own account` });
+  }
+
   try {
     const user = await User.findByIdAndUpdate(
       targetUserId,
@@ -156,7 +160,7 @@ router.put('/deactivate/:userId', async (req, res) => {
 //Active user
 
 router.put('/activate/:id', async (req, res) => {
-  const { userId, role } = req.context || {};
+  const { role } = req.context || {};
 
   if (role !== 'admin' && role !== 'librarian') {
     return res.status(403).json({ message: 'Not authorized' });
