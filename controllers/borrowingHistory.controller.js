@@ -64,7 +64,7 @@ router.get('/borrow-list', async (req, res) => {
     author,
     bookDepartment,
     userDepartment,
-  } = req.query || {};
+  } = req.body || {};
 
   // Building the search criteria dynamically
   let filterCriteria = { status: 'borrowed' };
