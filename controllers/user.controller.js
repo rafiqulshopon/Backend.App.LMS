@@ -79,6 +79,30 @@ router.get('/users', async (req, res) => {
   }
 });
 
+// Fetch a single user by ID
+router.get('/user/:id', async (req, res) => {
+  const { userId, role } = req.context || {};
+
+  if (role !== 'admin' && role !== 'librarian') {
+    return res.status(403).json({ message: 'Not authorized' });
+  }
+
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    return res.status(200).json(user);
+  } catch (error) {
+    if (error instanceof mongoose.Error.CastError) {
+      return res.status(400).json({ message: 'Invalid user ID.' });
+    }
+    return res.status(500).json({ message: 'Failed to fetch user.' });
+  }
+});
+
 // Fetch my profile
 router.get('/profile', async (req, res) => {
   const { userId } = req.context || {};
