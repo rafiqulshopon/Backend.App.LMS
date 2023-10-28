@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
   otp: String,
   otpExpires: Date,
   isVerified: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: true },
 });
 
 // Before saving the user, hash the password
