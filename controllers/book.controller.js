@@ -27,6 +27,28 @@ router.get('/books', async (req, res) => {
   }
 });
 
+// Fetch details of a single book
+router.get('/book/:id', async (req, res) => {
+  const userId = req.context.userId;
+  const bookId = req.params.id;
+
+  if (!userId) {
+    return res
+      .status(401)
+      .json({ message: 'Authentication failed. Please log in.' });
+  }
+
+  try {
+    const book = await Book.findById(bookId);
+    if (!book) {
+      return res.status(404).json({ message: 'Book not found.' });
+    }
+    res.status(200).json(book);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch book details.' });
+  }
+});
+
 // Add a book
 router.post('/books', async (req, res) => {
   const input = req.body;
