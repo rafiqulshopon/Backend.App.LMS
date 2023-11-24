@@ -44,7 +44,7 @@ router.get('/book/:id', async (req, res) => {
 });
 
 // search books
-router.post('/books', async (req, res) => {
+router.post('/search-books', async (req, res) => {
   const userId = req.context.userId;
   if (!userId) {
     return res
