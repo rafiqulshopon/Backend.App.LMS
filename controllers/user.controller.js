@@ -39,37 +39,14 @@ router.put('/profile', async (req, res) => {
 
 // Fetch all users
 router.get('/users', async (req, res) => {
-  const { userId, role } = req.context || {};
+  const { role } = req.context || {};
 
   if (role !== 'admin') {
     return res.status(403).json({ message: 'Not authorized' });
   }
 
-  const input = req.body || {};
-
   try {
-    const query = {};
-
-    if (input) {
-      if (input.studentId)
-        query['studentId'] = { $regex: input.studentId, $options: 'i' };
-      if (input.batch) query['batch'] = { $regex: input.batch, $options: 'i' };
-      if (input.department)
-        query['department'] = { $regex: input.department, $options: 'i' };
-      if (input.email) query['email'] = { $regex: input.email, $options: 'i' };
-      if (input.phoneNumber)
-        query['phoneNumber'] = { $regex: input.phoneNumber, $options: 'i' };
-      if (input.address)
-        query['address'] = { $regex: input.address, $options: 'i' };
-      if (input.isVerified !== undefined && input.isVerified !== null)
-        query['isVerified'] = input.isVerified;
-      if (input.name)
-        query['name.first'] = { $regex: input.name, $options: 'i' };
-      if (input.name)
-        query['name.last'] = { $regex: input.name, $options: 'i' };
-    }
-
-    const users = await User.find(query).select('-password');
+    const users = await User.find().select('-password');
     return res.status(200).json({ users });
   } catch (error) {
     return res.status(500).json({
@@ -101,6 +78,57 @@ router.get('/user/:id', async (req, res) => {
       return res.status(400).json({ message: 'Invalid user ID.' });
     }
     return res.status(500).json({ message: 'Failed to fetch user.' });
+  }
+});
+
+// search users
+router.post('/search-users', async (req, res) => {
+  const { role } = req.context || {};
+
+  if (role !== 'admin') {
+    return res.status(403).json({ message: 'Not authorized' });
+  }
+
+  const { search_keyword } = req.body || {};
+
+  try {
+    let pipeline = [
+      {
+        $addFields: {
+          fullName: { $concat: ['$name.first', ' ', '$name.last'] },
+        },
+      },
+      {
+        $match: {},
+      },
+      {
+        $project: { password: 0 },
+      },
+    ];
+
+    if (search_keyword) {
+      const regex = { $regex: search_keyword, $options: 'i' };
+      pipeline[1].$match.$or = [
+        { fullName: regex },
+        { email: regex },
+        { department: regex },
+        { studentId: regex },
+        { batch: regex },
+        { phoneNumber: regex },
+        { address: regex },
+        { role: regex },
+      ];
+    }
+
+    const users = await User.aggregate(pipeline).exec();
+
+    return res.status(200).json({ users });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      users: [],
+    });
   }
 });
 
