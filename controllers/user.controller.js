@@ -41,7 +41,7 @@ router.get('/users', async (req, res) => {
   }
 
   try {
-    const users = await User.find().select('-password');
+    const users = await User.find().select('-password').sort({ _id: -1 });
     return res.status(200).json({ users });
   } catch (error) {
     return res.status(500).json({
