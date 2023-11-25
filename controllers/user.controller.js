@@ -5,7 +5,7 @@ import User from '../models/user.model.js';
 const router = express.Router();
 
 // Edit Profile
-router.put('/profile', async (req, res) => {
+router.put('/edit-profile', async (req, res) => {
   const { userId } = req.context || {};
   const input = req.body || {};
 
@@ -16,12 +16,7 @@ router.put('/profile', async (req, res) => {
   }
 
   try {
-    const updates = {};
-
-    if (input.address) updates.address = input.address;
-    if (input.phoneNumber) updates.phoneNumber = input.phoneNumber;
-    if (input.department) updates.department = input.department;
-    if (input.batch) updates.batch = input.batch;
+    const { isActive, isVerified, _id, ...updates } = input;
 
     const user = await User.findByIdAndUpdate(userId, updates, {
       new: true,
