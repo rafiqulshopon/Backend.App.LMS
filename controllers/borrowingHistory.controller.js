@@ -53,8 +53,7 @@ router.post('/assign', async (req, res) => {
   }
 });
 
-router.get('/borrow-list', async (req, res) => {
-  // Extracting query parameters
+router.post('/borrow-list', async (req, res) => {
   const {
     userId,
     studentId,
@@ -67,14 +66,12 @@ router.get('/borrow-list', async (req, res) => {
     status = 'borrowed',
   } = req.body || {};
 
-  // Building the search criteria dynamically
   let filterCriteria = { status };
 
   if (userId) filterCriteria['user'] = userId;
   if (studentId) filterCriteria['user.studentId'] = studentId;
 
   try {
-    // Fetch borrowing records based on filters
     const borrowedBooks = await BorrowingHistory.find(filterCriteria)
       .populate({
         path: 'book',
@@ -101,9 +98,9 @@ router.get('/borrow-list', async (req, res) => {
             department: { $regex: userDepartment, $options: 'i' },
           }),
         },
-      });
+      })
+      .sort({ _id: -1 });
 
-    // Filter out any borrowing records that did not match the book/user populate conditions
     const filteredBorrowedBooks = borrowedBooks.filter(
       (record) => record.book && record.user
     );
