@@ -115,4 +115,39 @@ router.post('/borrow-list', async (req, res) => {
   }
 });
 
+router.post('/return', async (req, res) => {
+  const { userId, role } = req.context || {};
+  const { borrowingHistoryId, comment } = req.body;
+
+  if (!userId || !allowedRoles.includes(role)) {
+    return res.status(403).json({ message: 'Not authorized' });
+  }
+
+  try {
+    const borrowingRecord = await BorrowingHistory.findById(borrowingHistoryId);
+    if (!borrowingRecord) {
+      return res.status(404).json({ message: 'Borrowing record not found.' });
+    }
+
+    borrowingRecord.actualReturnDate = new Date();
+    borrowingRecord.status = 'returned';
+    if (comment) {
+      borrowingRecord.comment = comment;
+    }
+    await borrowingRecord.save();
+
+    const book = await Book.findById(borrowingRecord.book);
+    if (book) {
+      book.currentQuantity += 1;
+      await book.save();
+    }
+
+    res.status(200).json({ message: 'Book returned successfully.' });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: 'Internal server error.', error: error.message });
+  }
+});
+
 export default router;

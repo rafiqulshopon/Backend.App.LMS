@@ -11,6 +11,7 @@ const borrowingHistorySchema = new mongoose.Schema({
     enum: ['borrowed', 'returned', 'overdue'],
     default: 'borrowed',
   },
+  comment: String,
   fines: { type: Number, default: 0 },
 });
 
