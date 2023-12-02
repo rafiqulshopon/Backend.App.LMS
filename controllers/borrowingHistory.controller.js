@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import BorrowingHistory from '../models/borrowingHistory.model.js';
 import Book from '../models/book.model.js';
 
@@ -54,58 +55,58 @@ router.post('/assign', async (req, res) => {
 });
 
 router.post('/borrow-list', async (req, res) => {
-  const {
-    userId,
-    studentId,
-    firstName,
-    lastName,
-    title,
-    author,
-    bookDepartment,
-    userDepartment,
-    status = 'borrowed',
-  } = req.body || {};
+  const { userId, status = 'borrowed' } = req.body || {};
 
   let filterCriteria = { status };
+  let userMatch = {};
+  let bookMatch = {};
 
-  if (userId) filterCriteria['user'] = userId;
-  if (studentId) filterCriteria['user.studentId'] = studentId;
+  if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+    filterCriteria['user'] = new mongoose.Types.ObjectId(userId);
+  }
 
   try {
-    const borrowedBooks = await BorrowingHistory.find(filterCriteria)
-      .populate({
-        path: 'book',
-        select:
-          'title author category department description publishedDate isbn totalQuantity currentQuantity',
-        match: {
-          ...(title && { title: { $regex: title, $options: 'i' } }),
-          ...(author && { author: { $regex: author, $options: 'i' } }),
-          ...(bookDepartment && {
-            department: { $regex: bookDepartment, $options: 'i' },
-          }),
+    let pipeline = [
+      {
+        $match: filterCriteria,
+      },
+      {
+        $lookup: {
+          from: 'books',
+          localField: 'book',
+          foreignField: '_id',
+          as: 'book',
         },
-      })
-      .populate({
-        path: 'user',
-        select:
-          'name email dateOfBirth phoneNumber role address batch department studentId',
-        match: {
-          ...(firstName && {
-            'name.first': { $regex: firstName, $options: 'i' },
-          }),
-          ...(lastName && { 'name.last': { $regex: lastName, $options: 'i' } }),
-          ...(userDepartment && {
-            department: { $regex: userDepartment, $options: 'i' },
-          }),
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'user',
         },
-      })
-      .sort({ _id: -1 });
+      },
+      {
+        $unwind: '$book',
+      },
+      {
+        $unwind: '$user',
+      },
+      {
+        $match: {
+          $and: [userMatch, bookMatch],
+        },
+      },
+      {
+        $project: {
+          'user.password': 0,
+        },
+      },
+    ];
 
-    const filteredBorrowedBooks = borrowedBooks.filter(
-      (record) => record.book && record.user
-    );
+    const borrowedBooks = await BorrowingHistory.aggregate(pipeline).exec();
 
-    res.status(200).json({ borrowingHistories: filteredBorrowedBooks });
+    res.status(200).json({ borrowingHistories: borrowedBooks });
   } catch (error) {
     res.status(500).json({ message: 'Internal server error.' });
   }
