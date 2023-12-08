@@ -71,6 +71,14 @@ router.post('/signup', async (req, res) => {
         'OTP sent to your email. Please verify to complete registration.',
     });
   } catch (error) {
+    if (error.message.includes('studentId_1 dup key')) {
+      res
+        .status(500)
+        .json({
+          message: 'StudentId/TeacherId is already used!',
+          error: error.message,
+        });
+    }
     res
       .status(500)
       .json({ message: 'Something went wrong.', error: error.message });
