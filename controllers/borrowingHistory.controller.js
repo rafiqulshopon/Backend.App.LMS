@@ -55,11 +55,15 @@ router.post('/assign', async (req, res) => {
 });
 
 router.post('/borrow-list', async (req, res) => {
-  const { bookId, userId, status } = req.body || {};
+  const { bookId, borrowId, status, userId } = req.body || {};
 
   let filterCriteria = {};
   let userMatch = {};
   let bookMatch = {};
+
+  if (borrowId && mongoose.Types.ObjectId.isValid(borrowId)) {
+    filterCriteria['_id'] = new mongoose.Types.ObjectId(borrowId);
+  }
 
   if (status) {
     filterCriteria['status'] = status;
