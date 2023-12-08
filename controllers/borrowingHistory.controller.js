@@ -80,7 +80,10 @@ router.post('/borrow-list', async (req, res) => {
   try {
     let pipeline = [
       {
-        $match: filterCriteria,
+        $match: {
+          ...(borrowId && { _id: new mongoose.Types.ObjectId(borrowId) }),
+          ...filterCriteria,
+        },
       },
       {
         $lookup: {
