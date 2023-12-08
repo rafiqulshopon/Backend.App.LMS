@@ -72,16 +72,15 @@ router.post('/signup', async (req, res) => {
     });
   } catch (error) {
     if (error.message.includes('studentId_1 dup key')) {
+      res.status(500).json({
+        message: 'StudentId/TeacherId is already used!',
+        error: error.message,
+      });
+    } else {
       res
         .status(500)
-        .json({
-          message: 'StudentId/TeacherId is already used!',
-          error: error.message,
-        });
+        .json({ message: 'Something went wrong.', error: error.message });
     }
-    res
-      .status(500)
-      .json({ message: 'Something went wrong.', error: error.message });
   }
 });
 
