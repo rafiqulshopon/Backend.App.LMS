@@ -11,8 +11,8 @@ const userSchema = new mongoose.Schema({
   department: { type: String, required: false },
   studentId: { type: String, required: false, unique: true },
   batch: { type: String, required: false },
-  dateOfBirth: { type: Date, required: true },
-  phoneNumber: { type: String, required: true, unique: true },
+  dateOfBirth: { type: Date, required: false },
+  phoneNumber: { type: String, required: false, unique: true },
   address: { type: String, required: false },
   role: {
     type: String,
@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
   otp: String,
   otpExpires: Date,
   isVerified: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: true },
 });
 
 // Before saving the user, hash the password

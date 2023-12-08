@@ -14,8 +14,47 @@ router.get('/books', async (req, res) => {
   }
 
   try {
+    const books = await Book.find().sort({ _id: -1 });
+    res.json(books);
+  } catch (error) {
+    res.status(500).send({ message: 'Failed to fetch books' });
+  }
+});
+
+// Fetch details of a single book
+router.get('/book/:id', async (req, res) => {
+  const userId = req.context.userId;
+  const bookId = req.params.id;
+
+  if (!userId) {
+    return res
+      .status(401)
+      .json({ message: 'Authentication failed. Please log in.' });
+  }
+
+  try {
+    const book = await Book.findById(bookId);
+    if (!book) {
+      return res.status(404).json({ message: 'Book not found.' });
+    }
+    res.status(200).json(book);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch book details.' });
+  }
+});
+
+// search books
+router.post('/search-books', async (req, res) => {
+  const userId = req.context.userId;
+  if (!userId) {
+    return res
+      .status(401)
+      .send({ message: 'Authentication failed. Please log in.' });
+  }
+
+  try {
     const query = {};
-    const input = req.query;
+    const input = req.body;
     if (input?.department) query.department = input.department;
     if (input?.author) query.author = { $regex: input.author, $options: 'i' };
     if (input?.title) query.title = { $regex: input.title, $options: 'i' };
@@ -93,6 +132,28 @@ router.put('/books/:id', async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+});
+
+// Delete Book
+router.delete('/book/:id', async (req, res) => {
+  const { userId, role } = req.context || {};
+  const bookId = req.params.id;
+
+  if (!userId || !allowedRoles.includes(role)) {
+    return res.status(403).json({ message: 'Not authorized' });
+  }
+
+  try {
+    const book = await Book.findByIdAndDelete(bookId);
+
+    if (!book) {
+      return res.status(404).json({ message: 'Book not found.' });
+    }
+
+    return res.status(200).json({ message: 'Book deleted successfully.' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to delete the book.' });
   }
 });
 
