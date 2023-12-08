@@ -34,6 +34,24 @@ router.get('/dashboard', async (req, res) => {
       { $group: { _id: '$book', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 5 },
+      {
+        $lookup: {
+          from: 'books',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'bookDetails',
+        },
+      },
+      {
+        $unwind: '$bookDetails',
+      },
+      {
+        $project: {
+          count: 1,
+          bookTitle: '$bookDetails.title',
+          bookAuthor: '$bookDetails.author',
+        },
+      },
     ]);
 
     const totalOverdueBooks = await BorrowingHistory.count({
@@ -50,6 +68,25 @@ router.get('/dashboard', async (req, res) => {
       { $group: { _id: '$user', activityCount: { $sum: 1 } } },
       { $sort: { activityCount: -1 } },
       { $limit: 5 },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'userDetails',
+        },
+      },
+      {
+        $unwind: '$userDetails',
+      },
+      {
+        $project: {
+          activityCount: 1,
+          userName: {
+            $concat: ['$userDetails.name.first', ' ', '$userDetails.name.last'],
+          },
+        },
+      },
     ]);
 
     res.json({
