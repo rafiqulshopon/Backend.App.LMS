@@ -108,4 +108,45 @@ router.get('/dashboard', async (req, res) => {
   }
 });
 
+router.get('/user-dashboard', async (req, res) => {
+  const { userId } = req.context || {};
+
+  if (!userId) {
+    return res.status(401).json({ message: 'User not authenticated.' });
+  }
+
+  try {
+    const currentBorrowings = await BorrowingHistory.find({
+      user: userId,
+      status: 'borrowed',
+    })
+      .populate('book', 'title author')
+      .select('book borrowDate expectedReturnDate');
+
+    const borrowingHistory = await BorrowingHistory.find({
+      user: userId,
+      status: { $in: ['returned', 'overdue'] },
+    })
+      .populate('book', 'title author')
+      .select(
+        'book borrowDate expectedReturnDate actualReturnDate status fines'
+      );
+
+    const overdueBooks = await BorrowingHistory.find({
+      user: userId,
+      status: 'overdue',
+    })
+      .populate('book', 'title author')
+      .select('book expectedReturnDate fines');
+
+    res.json({
+      currentBorrowings,
+      borrowingHistory,
+      overdueBooks,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error', error });
+  }
+});
+
 export default router;

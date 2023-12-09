@@ -1,5 +1,7 @@
 import express from 'express';
 import Book from '../models/book.model.js';
+import BorrowingHistory from '../models/borrowingHistory.model.js';
+import User from '../models/user.model.js';
 
 const router = express.Router();
 const allowedRoles = ['admin', 'librarian'];
@@ -154,6 +156,53 @@ router.delete('/book/:id', async (req, res) => {
     return res.status(200).json({ message: 'Book deleted successfully.' });
   } catch (error) {
     return res.status(500).json({ message: 'Failed to delete the book.' });
+  }
+});
+
+router.post('/submit-review', async (req, res) => {
+  const { userId } = req.context || {};
+  const { bookId, rating, comment } = req.body;
+
+  try {
+    const hasBorrowedAndReturned = await BorrowingHistory.findOne({
+      user: userId,
+      book: bookId,
+      status: 'returned',
+    });
+
+    if (!hasBorrowedAndReturned) {
+      return res
+        .status(403)
+        .json({ message: 'You are not eligible to review this book.' });
+    }
+
+    const alreadyReviewed = await Book.findOne({
+      _id: bookId,
+      'reviews.user': userId,
+    });
+    if (alreadyReviewed) {
+      return res
+        .status(400)
+        .json({ message: 'You have already reviewed this book.' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const review = {
+      user: userId,
+      fullName: `${user.name.first} ${user.name.last}`,
+      rating,
+      comment,
+    };
+
+    await Book.findByIdAndUpdate(bookId, { $push: { reviews: review } });
+
+    res.status(201).json({ message: 'Review submitted successfully.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error', error });
   }
 });
 
