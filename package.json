@@ -1,5 +1,5 @@
 {
-  "name": "apollo-server-starter",
+  "name": "backend-app-lms",
   "version": "1.0.0",
   "description": "",
   "type": "module",
@@ -15,13 +15,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@apollo/server": "^4.9.4",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "graphql": "^16.8.1",
-    "graphql-tag": "^2.12.6",
     "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.6.0",

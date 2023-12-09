@@ -71,9 +71,16 @@ router.post('/signup', async (req, res) => {
         'OTP sent to your email. Please verify to complete registration.',
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'Something went wrong.', error: error.message });
+    if (error.message.includes('studentId_1 dup key')) {
+      res.status(500).json({
+        message: 'StudentId/TeacherId is already used!',
+        error: error.message,
+      });
+    } else {
+      res
+        .status(500)
+        .json({ message: 'Something went wrong.', error: error.message });
+    }
   }
 });
 
@@ -174,6 +181,12 @@ router.post('/login', async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
       return res.status(404).json({ message: "User doesn't exist." });
+    }
+
+    if (!existingUser.isActive) {
+      return res.status(400).json({
+        message: 'Your account is deactivated, please contact with admin.',
+      });
     }
 
     const isPasswordValid = await existingUser.isValidPassword(password);
