@@ -10,18 +10,21 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const bookSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  author: { type: String, required: true },
-  category: { type: String, required: true },
-  department: { type: String, required: true },
-  description: String,
-  publishedDate: String,
-  isbn: { type: String, required: true },
-  totalQuantity: { type: Number, required: true, default: 0 },
-  currentQuantity: { type: Number, required: true, default: 0 },
-  reviews: [reviewSchema],
-});
+const bookSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    author: { type: String, required: true },
+    category: { type: String, required: true },
+    department: { type: String, required: true },
+    description: String,
+    publishedDate: String,
+    isbn: { type: String, required: true },
+    totalQuantity: { type: Number, required: true, default: 0 },
+    currentQuantity: { type: Number, required: true, default: 0 },
+    reviews: [reviewSchema],
+  },
+  { timestamps: true }
+);
 
 const Book = mongoose.model('Book', bookSchema);
 
